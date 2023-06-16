@@ -1,13 +1,17 @@
 // import 'dart:js';
 
 // import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loginapp/MyNumber.dart';
 import 'package:loginapp/MyProfile.dart';
+import 'package:pinput/pinput.dart';
 // import 'package:verify/phone.dart';
 // import 'package:verify/profile.dart';
 
 class MyVerify extends StatefulWidget {
   final String mobileNumber;
+
 
   const MyVerify({Key? key, required this.mobileNumber}) : super(key: key);
 
@@ -18,7 +22,7 @@ class MyVerify extends StatefulWidget {
 
 class _MyVerifyState extends State<MyVerify> {
 
-  // final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   void _navigateToProfilePage() {
     // Navigator.push(
@@ -29,6 +33,30 @@ class _MyVerifyState extends State<MyVerify> {
 
   @override
   Widget build(BuildContext context) {
+
+    final defaultPinTheme = PinTheme(
+      width: 56,
+      height: 56,
+      textStyle: TextStyle(fontSize: 20, color: Color.fromRGBO(30, 60, 87, 1), fontWeight: FontWeight.w600),
+      decoration: BoxDecoration(
+        border: Border.all(color: Color.fromRGBO(234, 239, 243, 1)),
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+
+    final focusedPinTheme = defaultPinTheme.copyDecorationWith(
+      border: Border.all(color: Color.fromRGBO(114, 178, 238, 1)),
+      borderRadius: BorderRadius.circular(8),
+    );
+
+    final submittedPinTheme = defaultPinTheme.copyWith(
+      decoration: defaultPinTheme.decoration?.copyWith(
+        color: Color.fromRGBO(234, 239, 243, 1),
+      ),
+    );
+
+
+
 
     var code = "";
     return  Scaffold(
@@ -53,13 +81,13 @@ class _MyVerifyState extends State<MyVerify> {
             ),
             SizedBox(height: 10.0),
             //boxes to add otp
-            // Pinput(
-            //   length :6,
-            //   showCursor : true,
-            //   onChanged: (value){
-            //     code=value;
-            //   }
-            // ),
+            Pinput(
+              length: 6,
+              showCursor: true,
+              onChanged: (value){
+                code=value;
+              },
+            ),
             SizedBox(height: 20.0),
             Row(
 
@@ -100,16 +128,26 @@ class _MyVerifyState extends State<MyVerify> {
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
-              onPressed:() {
+              onPressed:() async {
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyProfile()),
-                );
-                // PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: MyPhone.verify, smsCode: code);
+                try{
+                  PhoneAuthCredential credential = PhoneAuthProvider.credential(
+                      verificationId: MyNumber.verify, smsCode: code);
 
-                // Sign the user in (or link) with the credential
-                // await auth.signInWithCredential(credential);
+
+                  await auth.signInWithCredential(credential);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyProfile()),
+                  );
+
+                }catch(e){
+                    print("Otp is Wrong");
+                }
+
+
+
 
                 // Navigator.pushNamed(context, 'profile');
               },

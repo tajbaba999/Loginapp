@@ -1,15 +1,32 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loginapp/MyProfile.dart';
 import 'package:loginapp/MyVerify.dart';
 // import 'dart:js';
 
 class MyNumber extends StatefulWidget {
   const MyNumber({super.key});
 
+  static String verify = "";
+
   @override
   State<MyNumber> createState() => _MyNumberState();
 }
 
 class _MyNumberState extends State<MyNumber> {
+  TextEditingController countryCode = TextEditingController();
+
+
+  var phone="";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    countryCode.text = "+91";
+    super.initState();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -63,7 +80,7 @@ class _MyNumberState extends State<MyNumber> {
                 Expanded(
                   child: TextField(
                     onChanged: (value){
-                      // phone=value;
+                      phone=value;
                     },
                     // controller: _mobileNumberController,
                     keyboardType: TextInputType.phone,
@@ -78,14 +95,24 @@ class _MyNumberState extends State<MyNumber> {
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
-              onPressed: ()  {
+              onPressed: ()  async{
 
+                await FirebaseAuth.instance.verifyPhoneNumber(
+                  phoneNumber: '${countryCode.text + phone}',
+                  verificationCompleted: (PhoneAuthCredential credential) {},
+                  verificationFailed: (FirebaseAuthException e) {},
+                  codeSent: (String verificationId, int? resendToken) {
+                    MyNumber.verify=verificationId;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MyVerify(mobileNumber: "${phone}")),
+                    );
+                  },
+                  codeAutoRetrievalTimeout: (String verificationId) {},
+                );
 
                 // Handle button press
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyVerify(mobileNumber: "234234234234")),
-                );
+
 
                 // _navigateToOtpPage();
               },
